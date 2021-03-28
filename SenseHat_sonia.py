@@ -18,22 +18,36 @@ class Aplicacion:
         self.list_max = [105, 1260, 100]   #Valores maximos
         self.periodo = self.periodo_inicial
 
-        #Creamos la ventana
+        #Creamos la ventana Monitorizacion
         self.ventana = tk.Tk() 
         self.ventana.title("Practica GUI SenseHat")
 
         self.labelframe1=ttk.LabelFrame(self.ventana, text="Control")        
-        self.labelframe1.grid(column=0, row=0, padx=5, pady=10)        
+        self.labelframe1.grid(column=0, row=1, padx=5, pady=10)        
         self.control()
 
         self.labelframe2=ttk.LabelFrame(self.ventana, text="Medidas")        
-        self.labelframe2.grid(column=0, row=1, padx=5, pady=10)        
+        self.labelframe2.grid(column=0, row=2, padx=5, pady=10)        
         self.medidas()
         
         self.labelframe3=ttk.LabelFrame(self.ventana, text="Historico")        
-        self.labelframe3.grid(column=0, row=2, padx=5, pady=10)        
+        self.labelframe3.grid(column=0, row=3, padx=5, pady=10)        
         self.historico()
 
+
+        self.cuaderno1 = ttk.Notebook(self.ventana)
+        self.pagina1 = ttk.Frame(self.cuaderno1)
+        self.cuaderno1.add(self.pagina1, text = "Monitorizacion")
+
+        #Creamos la ventana Gráfico
+        self.pagina2 = ttk.Frame(self.cuaderno1)
+        self.cuaderno1.add(self.pagina2, text = "Gráfica")
+
+        self.cuaderno1.grid(column = 0, row = 0, sticky='WE')
+
+        #Creamos las opciones
+
+        
 
         self.ventana.mainloop()
     
