@@ -14,9 +14,8 @@ class Aplicacion:
         
         self.medir = True
 
-        self.queue = queue.Queue()
+        self.queue=queue.Queue() 
 
-        self.list_max = [105, 1260, 100]   #Valores maximos
         self.periodo = self.periodo_inicial
 
         self.ventana = tk.Tk() 
@@ -141,7 +140,6 @@ class Aplicacion:
                 self.entry1.config(textvariable=self.dato)
 
         except queue.Empty:
-            #Worker(self.queue).start()
             self.ventana.after(self.periodo, self.process_queue)
 
     
@@ -166,13 +164,13 @@ class Worker(threading.Thread):
             while self.medir == True:
                 #Si está marcado temperatura ponemos en la cola la temperatura
                 if self.seleccion.get() == 1:
-                    self.queue.put(str(temp))
+                    self.queue.put(temp)
                 #Si está marcado presion, ponemos la presion en la cola
                 elif self.seleccion.get() == 2:
-                    self.queue.put(str(pres))
+                    self.queue.put(pres)
                 #Si está marcado humedad, ponemos la humedad en la cola
                 else:
-                    self.queue.put(str(hum))
+                    self.queue.put(hum)
 
         except:
             self.queue.put("Error")
