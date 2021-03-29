@@ -54,18 +54,15 @@ class Aplicacion:
         self.cuaderno1.grid(column = 0, row = 0, sticky='WE')
 
 
-        #Worker(self.queue).start()
+        Worker(self.queue).start()
         self.ventana.after(self.periodo, self.process_queue)
-        #self.ventana.after(self.periodo, self.llamar_medir)
         self.ventana.mainloop()
 
     def cambiar_periodo(self):
         dialogo1 = DialogoPeriodo(self.ventana)
         self.periodo = dialogo1.modificar()
         print("periodo: ", self.periodo)
-        self.label1_1=ttk.Label(self.labelframe1, text = str(self.periodo))
-        self.label1_1.grid(column=2, row=1)
-
+        self.label1_1.config(text = str(self.periodo))
 
 
     def control(self):
@@ -97,7 +94,7 @@ class Aplicacion:
 
         #Creamos Radiobutton
         self.seleccion=tk.IntVar()
-        self.seleccion.set(2)
+        self.seleccion.set(1)
         
         self.radio1=ttk.Radiobutton(self.labelframe2, text="Temperatura", variable=self.seleccion, value=1)
         self.radio1.grid(column=0, row=1)
@@ -137,13 +134,12 @@ class Aplicacion:
 
     def process_queue(self):
         try:
-            res = self.queue.get(0)
-            #Pongo el resultado en el Cuadro de texto
-            self.dato=tk.StringVar(self.labelframe2, value = str(res))
-            self.entry1=tk.Entry(self.labelframe2, width=10, textvariable=self.dato)
-            self.entry1.grid(column=1, row=0)
-            #self.label2.configure(text=res)
-            #self.boton2.config(state="normal")
+            if(self.medir == True):
+                res = self.queue.get(0)
+                #Pongo el resultado en el Cuadro de texto
+                self.dato=tk.StringVar(self.labelframe2, value = str(res))
+                self.entry1.config(textvariable=self.dato)
+
         except queue.Empty:
             #Worker(self.queue).start()
             self.ventana.after(self.periodo, self.process_queue)
@@ -160,24 +156,23 @@ class Worker(threading.Thread):
     def __init__(self, queue):
         threading.Thread.__init__(self)
         self.queue = queue
-        #self.num = 1
 
     def run(self):
         try:
-            temp = self.sense.temperature
+            temp = self.sense.temp
             pres = self.sense.pressure
             hum = self.sense.humidity
-            #while self.num > 0:
+            
+            while self.medir == True:
                 #Si está marcado temperatura ponemos en la cola la temperatura
-            if self.seleccion.get() == 1:
-                print("Temperatura = ", temp)
-                self.queue.put(str(temp))
-            #Si está marcado presion, ponemos la presion en la cola
-            elif self.seleccion.get() == 2:
-                self.queue.put(str(pres))
-            #Si está marcado humedad, ponemos la humedad en la cola
-            else:
-                self.queue.put(str(hum))
+                if self.seleccion.get() == 1:
+                    self.queue.put(str(temp))
+                #Si está marcado presion, ponemos la presion en la cola
+                elif self.seleccion.get() == 2:
+                    self.queue.put(str(pres))
+                #Si está marcado humedad, ponemos la humedad en la cola
+                else:
+                    self.queue.put(str(hum))
 
         except:
             self.queue.put("Error")
