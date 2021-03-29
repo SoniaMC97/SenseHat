@@ -54,8 +54,9 @@ class Aplicacion:
         self.cuaderno1.grid(column = 0, row = 0, sticky='WE')
 
 
-
+        #Worker(self.queue).start()
         self.ventana.after(self.periodo, self.process_queue)
+        #self.ventana.after(self.periodo, self.llamar_medir)
         self.ventana.mainloop()
 
     def cambiar_periodo(self):
@@ -69,7 +70,7 @@ class Aplicacion:
 
     def control(self):
         #Crear boton
-        self.boton=tk.Button(self.labelframe1, text="Parar")#, command = self.parar_medida)
+        self.boton=tk.Button(self.labelframe1, text="Parar", command = self.cambiar_1, bg = "red")
         self.boton.grid(column=1, row=0)
 
         #Crear cuadro de texto
@@ -79,8 +80,13 @@ class Aplicacion:
         self.label1_1=ttk.Label(self.labelframe1, text = str(self.periodo))
         self.label1_1.grid(column=2, row=1)
 
-    #def parar_medida(self):
-
+    def cambiar_1(self):
+        if(self.medir == True):
+            self.boton.config(text = "Comenzar", bg = "green")
+            self.medir = False
+        else:
+            self.boton.config(text = "Parar", bg = "red")
+            self.medir = True
 
     def medidas(self):
         #Creamos entry para 
@@ -139,32 +145,39 @@ class Aplicacion:
             #self.label2.configure(text=res)
             #self.boton2.config(state="normal")
         except queue.Empty:
+            #Worker(self.queue).start()
             self.ventana.after(self.periodo, self.process_queue)
 
     
     
     #def llamada_medir(self):
-    #    print("prueba")
+        #Si el boton está en parar mide
+        
+
+        #Si está en comenzar no mide
 
 class Worker(threading.Thread):
     def __init__(self, queue):
         threading.Thread.__init__(self)
         self.queue = queue
-        self.num = 1
+        #self.num = 1
 
     def run(self):
-        
         try:
-            while self.num > 0:
+            temp = self.sense.temperature
+            pres = self.sense.pressure
+            hum = self.sense.humidity
+            #while self.num > 0:
                 #Si está marcado temperatura ponemos en la cola la temperatura
-                if self.value == 1:
-                    self.queue.put(sense.temp)
-                #Si está marcado presion, ponemos la presion en la cola
-                elif self.value == 2:
-                    self.queue.put(sense.pressure)
-                #Si está marcado humedad, ponemos la humedad en la cola
-                else:
-                    self.queue.put(sense.humidity)
+            if self.seleccion.get() == 1:
+                print("Temperatura = ", temp)
+                self.queue.put(str(temp))
+            #Si está marcado presion, ponemos la presion en la cola
+            elif self.seleccion.get() == 2:
+                self.queue.put(str(pres))
+            #Si está marcado humedad, ponemos la humedad en la cola
+            else:
+                self.queue.put(str(hum))
 
         except:
             self.queue.put("Error")
