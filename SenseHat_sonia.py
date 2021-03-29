@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter import messagebox as mb
 from sense_emu import SenseHat
 import  queue
+import threading
 
 class Aplicacion:
 
@@ -54,7 +55,7 @@ class Aplicacion:
 
 
 
-        #self.ventana.after(self.periodo, self.llamada_medir)
+        self.ventana.after(self.periodo, self.process_queue)
         self.ventana.mainloop()
 
     def cambiar_periodo(self):
@@ -68,7 +69,7 @@ class Aplicacion:
 
     def control(self):
         #Crear boton
-        self.boton=tk.Button(self.labelframe1, text="Parar")#, command=self.calcularcuadrado)
+        self.boton=tk.Button(self.labelframe1, text="Parar")#, command = self.parar_medida)
         self.boton.grid(column=1, row=0)
 
         #Crear cuadro de texto
@@ -77,6 +78,9 @@ class Aplicacion:
 
         self.label1_1=ttk.Label(self.labelframe1, text = str(self.periodo))
         self.label1_1.grid(column=2, row=1)
+
+    #def parar_medida(self):
+
 
     def medidas(self):
         #Creamos entry para 
@@ -125,8 +129,45 @@ class Aplicacion:
         #self.boton3=tk.Button(self.labelframe3, text="Exportar")#, command=self.calcularcuadrado)
         #self.boton3.grid(column=0, row=1)
 
-    def llamada_medir(self):
-        print("prueba")
+    def process_queue(self):
+        try:
+            res = self.queue.get(0)
+            #Pongo el resultado en el Cuadro de texto
+            self.dato=tk.StringVar(self.labelframe2, value = str(res))
+            self.entry1=tk.Entry(self.labelframe2, width=10, textvariable=self.dato)
+            self.entry1.grid(column=1, row=0)
+            #self.label2.configure(text=res)
+            #self.boton2.config(state="normal")
+        except queue.Empty:
+            self.ventana.after(self.periodo, self.process_queue)
+
+    
+    
+    #def llamada_medir(self):
+    #    print("prueba")
+
+class Worker(threading.Thread):
+    def __init__(self, queue):
+        threading.Thread.__init__(self)
+        self.queue = queue
+        self.num = 1
+
+    def run(self):
+        
+        try:
+            while self.num > 0:
+                #Si está marcado temperatura ponemos en la cola la temperatura
+                if self.value == 1:
+                    self.queue.put(sense.temp)
+                #Si está marcado presion, ponemos la presion en la cola
+                elif self.value == 2:
+                    self.queue.put(sense.pressure)
+                #Si está marcado humedad, ponemos la humedad en la cola
+                else:
+                    self.queue.put(sense.humidity)
+
+        except:
+            self.queue.put("Error")
 
 class DialogoPeriodo:
     def __init__(self, ventanaprincipal):
